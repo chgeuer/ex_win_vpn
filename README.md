@@ -1,21 +1,12 @@
-# ExWinVpn
+# `ex_win_vpn`
 
-**TODO: Add description**
+A simple utility that shells out to `rasdial.exe` to establish/tear down VPN connections.
 
-## Installation
+Just include `{:ex_win_vpn, github: "chgeuer/ex_win_vpn"}` in your mix.exs, and call `Kino.Windows.VPN.new(your_vpn_name)` in your Livebook. 
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ex_win_vpn` to your list of dependencies in `mix.exs`:
+Or call `Windows.VPN.connect(vpn_name)` in your code.
 
-```elixir
-def deps do
-  [
-    {:ex_win_vpn, "~> 0.1.0"}
-  ]
-end
-```
+## Demo
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/ex_win_vpn>.
+![](images/demo.gif)
 

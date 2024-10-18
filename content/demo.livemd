@@ -1,0 +1,18 @@
+# VPN on Windows demo
+
+```elixir
+Mix.install([
+  {:ex_win_vpn, github: "chgeuer/ex_win_vpn" }
+])
+```
+
+## Turn VPN on and off...
+
+```elixir
+vpn_name = "MSFT-AzVPN-Manual"
+Kino.Windows.VPN.new(vpn_name)
+```
+
+```elixir
+Windows.VPN.connect(vpn_name)
+```
