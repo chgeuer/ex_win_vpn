@@ -1,5 +1,16 @@
 defmodule Kino.Windows.VPN do
-  defp out_to_md(str) do
+  defp out_to_md(output) do
+    str =
+      output
+      |> case do
+        {:ok, message} -> 
+          message
+        {:error, error_code, message} ->
+
+          "Error #{error_code}\n\n" <> message
+      end
+
+
     ("- " <>
        str)
     |> String.trim("\n")
@@ -19,14 +30,14 @@ defmodule Kino.Windows.VPN do
 
     Kino.listen(button_conect_vpn, fn _ ->
       Kino.Frame.render(frame, Kino.Markdown.new("### Connecting"))
-      {:ok, message} = Windows.VPN.connect(vpn_name)
-      Kino.Frame.append(frame, Kino.Markdown.new(out_to_md(message)))
+      result = Windows.VPN.connect(vpn_name)
+      Kino.Frame.append(frame, Kino.Markdown.new(out_to_md(result)))
     end)
 
     Kino.listen(button_disconnect_vpn, fn _ ->
       Kino.Frame.render(frame, Kino.Markdown.new("### Disconnecting"))
-      {:ok, message} = Windows.VPN.disconnect(vpn_name)
-      Kino.Frame.append(frame, Kino.Markdown.new(out_to_md(message)))
+      result = Windows.VPN.disconnect(vpn_name)
+      Kino.Frame.append(frame, Kino.Markdown.new(out_to_md(result)))
     end)
 
     button_layout = Kino.Layout.grid([button_conect_vpn, button_disconnect_vpn], columns: 2)

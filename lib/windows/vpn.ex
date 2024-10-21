@@ -4,6 +4,8 @@ defmodule Windows.VPN do
     |> case do
       {output, 0} ->
         {:ok, output}
+      {output, error_code} ->
+        {:error, error_code, output}
     end
   end
 
@@ -12,6 +14,8 @@ defmodule Windows.VPN do
     |> case do
       {output, 0} ->
         {:ok, output}
+      {output, error_code} ->
+        {:error, error_code, output}
     end
   end
 end
