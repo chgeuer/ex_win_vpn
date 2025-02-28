@@ -1,7 +1,7 @@
 defmodule Kino.Windows.VPN do
   @doc """
-  Creates a VPN connection toggle widget.
-  The toggle will reflect the VPN connection status and allow toggling.
+  Creates a VPN connection widget with a checkbox.
+  The checkbox reflects the VPN connection status and allows toggling.
 
   ## Parameters
 
@@ -9,18 +9,18 @@ defmodule Kino.Windows.VPN do
   * `refresh_interval` - How often to refresh the connection state in milliseconds (default: 5000)
 
   ## Examples
-     iex> Kino.Windows.VPN.new("MSFT-AzVPN-Manual")
-     iex> Kino.Windows.VPN.new("My-Corporate-VPN", 10000)
+     iex> Kino.Windows.VPN.new("MSFT-AzVPN-Manual", 1_000)
   """
   def new(vpn_name, refresh_interval \\ 5000) do
-    # Create a frame to hold our dynamic UI components
+    # Create a frame to hold our dynamic checkbox
     frame = Kino.Frame.new()
 
-    # Initial rendering of toggle control
-    render_toggle_control(frame, vpn_name)
+    # Initial rendering of checkbox
+    render_checkbox(frame, vpn_name, nil)
 
     # Start background task to monitor VPN status and update UI
     Task.async(fn ->
+      Process.sleep(refresh_interval)
       monitor_vpn_connection(frame, vpn_name, refresh_interval)
     end)
 
@@ -28,49 +28,48 @@ defmodule Kino.Windows.VPN do
     frame
   end
 
-  # Render the toggle control based on current VPN status
-  defp render_toggle_control(frame, vpn_name) do
+  # Render the checkbox control based on current VPN status
+  defp render_checkbox(frame, vpn_name, _last_state) do
     # Get current VPN connection state
     is_connected = Windows.VPN.connected_to(vpn_name)
 
-    # Create button with appropriate label based on current state
-    {button_label, status_text} =
-      if is_connected do
-        {"Disconnect from VPN", "✅ Connected to #{vpn_name}"}
-      else
-        {"Connect to VPN", "❌ Disconnected from #{vpn_name}"}
-      end
+    # Choose label based on connection state
+    label = if is_connected do
+      "Connected to #{vpn_name} (click to disconnect)"
+    else
+      "Disconnected from #{vpn_name} (click to connect)"
+    end
 
-    button = Kino.Control.button(button_label)
-    status = Kino.Text.new(status_text)
+    # Create a new checkbox with the current state
+    checkbox = Kino.Input.checkbox(label, default: is_connected)
 
-    # Place components in the frame
-    Kino.Frame.render(frame, Kino.Layout.grid([status, button], columns: 1))
+    # Render the checkbox in the frame
+    Kino.Frame.render(frame, checkbox)
 
-    # Set up listener for the button
-    Kino.listen(button, fn _ ->
-      # Execute the opposite action of current state
-      _result = if is_connected do
-        Windows.VPN.disconnect(vpn_name)
-      else
+    # Set up listener for the checkbox
+    Kino.listen(checkbox, fn %{value: requested_state} ->
+      # Execute the requested action based on checkbox's current value
+      if requested_state do
         Windows.VPN.connect(vpn_name)
+      else
+        Windows.VPN.disconnect(vpn_name)
       end
 
       # Small delay to allow the operation to complete
       Process.sleep(500)
 
-      # Re-render the control to reflect the new state
-      render_toggle_control(frame, vpn_name)
+      # Re-render the checkbox to reflect the new state
+      render_checkbox(frame, vpn_name, is_connected)
     end)
   end
 
   # Periodically check VPN connection and update UI if needed
   defp monitor_vpn_connection(frame, vpn_name, interval) do
-    # Wait for the specified interval
-    Process.sleep(interval)
+    # Re-render the checkbox to reflect current state
+    render_checkbox(frame, vpn_name, nil)
 
-    # Re-render the control to reflect current state
-    render_toggle_control(frame, vpn_name)
+    # Wait for the specified interval before checking again
+    Process.sleep(interval)
 
     # Continue monitoring
     monitor_vpn_connection(frame, vpn_name, interval)
