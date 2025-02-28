@@ -25,7 +25,7 @@ defmodule Windows.VPN do
   @success "Command completed successfully."
   @doc """
   Checks current VPN connections using rasdial.exe and returns a tuple indicating status.
-  
+
   Returns:
   - {:connected, [connection_names]} - when VPN connections are active
   - {:disconnected} - when no VPN connections are active
@@ -37,14 +37,22 @@ defmodule Windows.VPN do
       |> case do
         [ @no_connections, @success] ->
           {:disconnected}
-          
+
         [@connected | rest_with_command] ->
           {connection_names, [@success]} = Enum.split(rest_with_command, -1)
           {:connected, connection_names}
-          
+
         _ ->
           {:error, "rasdial.exe returned unknown response: #{response}"}
       end
-    end 
+    end
+  end
+
+  def connected_to(vpn_name) do
+    case list_connections() do
+      {:connected, vpns} -> vpn_name in vpns
+      {:disconnected} -> false
+      {:error, _} = error -> error
+    end
   end
 end

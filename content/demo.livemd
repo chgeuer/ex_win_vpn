@@ -2,7 +2,8 @@
 
 ```elixir
 Mix.install([
-  {:ex_win_vpn, github: "chgeuer/ex_win_vpn" }
+  # {:ex_win_vpn, github: "chgeuer/ex_win_vpn" }
+  {:ex_win_vpn, path: "/mnt/c/github/chgeuer/ex_win_vpn" }
 ])
 ```
 
@@ -10,9 +11,32 @@ Mix.install([
 
 ```elixir
 vpn_name = "MSFT-AzVPN-Manual"
+  
 Kino.Windows.VPN.new(vpn_name)
 ```
 
 ```elixir
-Windows.VPN.connect(vpn_name)
+Windows.VPN.connected_to(vpn_name)
+```
+
+```elixir
+form =
+  Kino.Control.form(
+    [
+      vpn_toggle: Kino.Input.checkbox("VPN is established", default: true)
+    ],
+    report_changes: true
+  )
+
+# Approach 1
+Task.async(fn ->
+  for %{data: %{vpn_toggle: completed}} <- Kino.Control.stream(form) do
+    IO.puts(completed)
+  end
+end)
+
+# Approach 2
+Kino.Control.subscribe(form, :vpn_form)
+
+form
 ```
