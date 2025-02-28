@@ -34,15 +34,14 @@ defmodule Kino.Windows.VPN do
     is_connected = Windows.VPN.connected_to(vpn_name)
 
     # Create button with appropriate label based on current state
-    button_label = if is_connected, do: "Disconnect from VPN", else: "Connect to VPN"
+    {button_label, status_text} =
+      if is_connected do
+        {"Disconnect from VPN", "✅ Connected to #{vpn_name}"}
+      else
+        {"Connect to VPN", "❌ Disconnected from #{vpn_name}"}
+      end
+
     button = Kino.Control.button(button_label)
-
-    # Create status text
-    status_text = if is_connected,
-      do: "✅ Connected to #{vpn_name}",
-      else: "❌ Disconnected from #{vpn_name}"
-
-    # Create a small text component for the status
     status = Kino.Text.new(status_text)
 
     # Place components in the frame
